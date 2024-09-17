@@ -12,6 +12,7 @@
 // Request Connection // Accept Connection
 // Duplicate Socket
 
+
 int main()
 {
 	// create socket
@@ -42,12 +43,13 @@ int main()
 		std::cerr << "Listener has failed" << std::endl;
 		std::cerr << "Listener Status: " << listen_status << std::endl;
 	} else {
-		std::cout << listen_status << std::endl;
+		std::cout << "Listener has succeeded" << std::endl;
 	}
 
 	// Accept connections
 	sockaddr_in client_address;
 	socklen_t client_size = sizeof(client_address);
+  // stops execution
 	int client_socket = accept(
 		server_socket, (struct sockaddr *)&client_address, &client_size);
 	if (client_socket == -1) {
@@ -64,6 +66,8 @@ int main()
             << std::endl;
 
   const char *message = "Hello from server!";
+
+  
   send(client_socket, message, strlen(message), 0);
 	// while there are no connections, wait
 
