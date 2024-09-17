@@ -1,49 +1,36 @@
 #include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <cstring>
 #include <arpa/inet.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
-#define port 5200
+int main() {
+    // Create a socket
+    int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientSocket == -1) {
+        std::cerr << "Error creating socket" << std::endl;
+        return 1;
+    }
 
-// Create Socket
-// Bind Address and Port to Socket
-// Request Connection // Accept Connection
-// Duplicate Socket
+    // Connect to the server
+    sockaddr_in serverAddress;
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(5200); // Port number
+    serverAddress.sin_addr.s_addr = inet_addr("127.0.0.1"); // Server IP 
 
-int main()
-{
-	// create socket
-	int server_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (server_socket == -1) {
-		std::cerr << "ERROR: Could not create Socket" << std::endl;
-	} else {
-		std::cout << "Successfully created Socket" << std::endl;
-	}
+    if (connect(clientSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == -1) {
+        std::cerr << "Error connecting to server" << std::endl;
+        close(clientSocket);
+        return 2;
+    }
 
-	// bind ip address and port to socket
-	struct sockaddr_in server_addr, client_addr;
-	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	server_addr.sin_port = htons(port);
-	// server_addr.sin_zero = ;
-	server_addr.sin_family = AF_INET;
-	int bind_server = bind(server_socket, (struct sockaddr *)&server_addr,
-			       sizeof(server_addr));
+    // Receive data from the server
+    char buffer[1024] = {0};
+    recv(clientSocket, buffer, sizeof(buffer), 0);
+    std::cout << "Server says: " << buffer << std::endl;
 
-	if (bind_server < 0) {
-		std::cerr << "ERROR: Could not bind socket" << std::endl;
-	} else {
-		std::cout << "Successfully bound Socket" << std::endl;
-	}
+    // Close socket
+    close(clientSocket); 
 
-	int listen_status = listen(server_socket, 5);
-	if (listen_status < 0) {
-		std::cerr << "Listener has failed" << std::endl;
-	} else {
-		std::cout << listen_status << std::endl;
-	}
-
-	// while there are no connections, wait
-
-	return 0;
+    return 0;
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -45,17 +46,30 @@ int main()
 	}
 
 	// Accept connections
-	sockaddr_in clientAddress;
-	socklen_t clientSize = sizeof(clientAddress);
-	int clientSocket = accept(
-		serverSocket, (struct sockaddr *)&clientAddress, &clientSize);
-	if (clientSocket == -1) {
+	sockaddr_in client_address;
+	socklen_t client_size = sizeof(client_address);
+	int client_socket = accept(
+		server_socket, (struct sockaddr *)&client_address, &client_size);
+	if (client_socket == -1) {
 		std::cerr << "Error accepting connection" << std::endl;
-		close(serverSocket);
+		close(server_socket);
 		return 1;
 	}
 
+  // Get client's IP address and port
+  char clientIP[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &(client_address.sin_addr), clientIP, INET_ADDRSTRLEN);
+  int clientPort = ntohs(client_address.sin_port);
+  std::cout << "Accepted connection from " << clientIP << ":" << clientPort
+            << std::endl;
+
+  const char *message = "Hello from server!";
+  send(client_socket, message, strlen(message), 0);
 	// while there are no connections, wait
 
-	return 0;
+  // Close sockets
+  close(client_socket);
+  close(server_socket);
+
+  return 0;
 }
