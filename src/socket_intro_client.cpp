@@ -24,10 +24,17 @@ int main() {
         return 2;
     }
 
+    // Sending data to Server
+    const char *message = "Hello from client!";
+    send(clientSocket, message, strlen(message), 0);
+
     // Receive data from the server
-    char buffer[1024] = {0};
-    recv(clientSocket, buffer, sizeof(buffer), 0);
-    std::cout << "Server says: " << buffer << std::endl;
+    while(true) {
+      char buffer[1024] = {0};
+      if (recv(clientSocket, buffer, sizeof(buffer), 0) != 0) {;
+        std::cout << "Server says: " << buffer << std::endl;
+      }
+    }
 
     // Close socket
     close(clientSocket); 

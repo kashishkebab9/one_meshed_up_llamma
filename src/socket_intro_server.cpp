@@ -1,9 +1,15 @@
 #include <iostream>
 #include <cstring>
+#include <ratio>
+#include <string>
+#include <vector>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 #define port 5200
 
@@ -12,6 +18,14 @@
 // Request Connection // Accept Connection
 // Duplicate Socket
 
+void count_to_client(int start, int up_to, int* client_socket) {
+  for (int i = start; i < start + up_to; i++) {
+    const std::string message = "Counter is at: " + std::to_string(i);
+    send(*client_socket, message.c_str(), message.size(), 0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  close(*client_socket);
+}
 
 int main()
 {
@@ -41,38 +55,62 @@ int main()
 	int listen_status = listen(server_socket, 5);
 	if (listen_status < 0) {
 		std::cerr << "Listener has failed" << std::endl;
-		std::cerr << "Listener Status: " << listen_status << std::endl;
 	} else {
 		std::cout << "Listener has succeeded" << std::endl;
 	}
+
+  // we open a new client_socker for each new client
+  std::vector<int> client_socket_vec;
+  std::vector<std::thread> thread_vec;
 
 	// Accept connections
 	sockaddr_in client_address;
 	socklen_t client_size = sizeof(client_address);
   // stops execution
-	int client_socket = accept(
-		server_socket, (struct sockaddr *)&client_address, &client_size);
-	if (client_socket == -1) {
-		std::cerr << "Error accepting connection" << std::endl;
-		close(server_socket);
-		return 1;
-	}
+  int client_count = 0;
+  while (true) {
+    int new_socket;
+
+    int client_socket = accept(
+      server_socket, (struct sockaddr *)&client_address, &client_size);
+    if (client_socket == -1) {
+      std::cerr << "Error accepting connection" << std::endl;
+      break;
+    } else {
+      client_count++;
+    }
+
+    std::cout << "Client Count: " << client_count << std::endl;
+    client_socket_vec.push_back(new_socket);
+
+    std::thread t1( count_to_client, 0, 100,&client_socket);
+    thread_vec.push_back(std::move(t1));
+
+    for (int i = 0; i< thread_vec.size(); i++) {
+      thread_vec[i].join();
+    }
+    
+  }
 
   // Get client's IP address and port
-  char clientIP[INET_ADDRSTRLEN];
-  inet_ntop(AF_INET, &(client_address.sin_addr), clientIP, INET_ADDRSTRLEN);
-  int clientPort = ntohs(client_address.sin_port);
-  std::cout << "Accepted connection from " << clientIP << ":" << clientPort
-            << std::endl;
+  // char clientIP[INET_ADDRSTRLEN];
+  // inet_ntop(AF_INET, &(client_address.sin_addr), clientIP, INET_ADDRSTRLEN);
+  // int clientPort = ntohs(client_address.sin_port);
+  // std::cout << "Accepted connection from " << clientIP << ":" << clientPort
+  //           << std::endl;
 
-  const char *message = "Hello from server!";
+  // Receive data from the client
+  // char buffer[1024] = {0};
+  // recv(client_socket, buffer, sizeof(buffer), 0);
+  // std::cout << "Client says: " << buffer << std::endl;
 
-  
-  send(client_socket, message, strlen(message), 0);
+  // Sending data to Client
+  // const char *message = "Hello from server!";
+  // send(client_socket, message, strlen(message), 0);
 	// while there are no connections, wait
 
   // Close sockets
-  close(client_socket);
+  // close(client_socket);
   close(server_socket);
 
   return 0;
