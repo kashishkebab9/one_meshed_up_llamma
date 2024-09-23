@@ -69,26 +69,21 @@ int main()
   // stops execution
   int client_count = 0;
   while (true) {
-    int new_socket;
 
     int client_socket = accept(
       server_socket, (struct sockaddr *)&client_address, &client_size);
+
     if (client_socket == -1) {
       std::cerr << "Error accepting connection" << std::endl;
-      break;
-    } else {
-      client_count++;
-    }
+      continue;
+    } 
+
+    client_count++;
 
     std::cout << "Client Count: " << client_count << std::endl;
-    client_socket_vec.push_back(new_socket);
 
     std::thread t1( count_to_client, 0, 100,&client_socket);
-    thread_vec.push_back(std::move(t1));
-
-    for (int i = 0; i< thread_vec.size(); i++) {
-      thread_vec[i].join();
-    }
+    t1.detach();
     
   }
 
@@ -111,7 +106,7 @@ int main()
 
   // Close sockets
   // close(client_socket);
-  close(server_socket);
 
+  close(server_socket);
   return 0;
 }
