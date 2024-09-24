@@ -18,13 +18,13 @@
 // Request Connection // Accept Connection
 // Duplicate Socket
 
-void count_to_client(int start, int up_to, int* client_socket) {
+void count_to_client(int start, int up_to, int client_socket) {
   for (int i = start; i < start + up_to; i++) {
     const std::string message = "Counter is at: " + std::to_string(i);
-    send(*client_socket, message.c_str(), message.size(), 0);
+    send(client_socket, message.c_str(), message.size(), 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
-  close(*client_socket);
+  close(client_socket);
 }
 
 int main()
@@ -82,7 +82,7 @@ int main()
 
     std::cout << "Client Count: " << client_count << std::endl;
 
-    std::thread t1( count_to_client, 0, 100,&client_socket);
+    std::thread t1( count_to_client, 0, 100,client_socket);
     t1.detach();
     
   }
