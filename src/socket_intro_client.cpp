@@ -29,10 +29,13 @@ int main() {
     send(clientSocket, message, strlen(message), 0);
 
     // Receive data from the server
+
+    const char* ack = "ACK"; 
     while(true) {
       char buffer[1024] = {0};
       if (recv(clientSocket, buffer, sizeof(buffer), 0) != 0) {;
         std::cout << "Server says: " << buffer << std::endl;
+        send(clientSocket, ack, strlen(ack), 0);
       }
     }
 

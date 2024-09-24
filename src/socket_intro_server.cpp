@@ -19,10 +19,25 @@
 // Duplicate Socket
 
 void count_to_client(int start, int up_to, int client_socket) {
+  static int client_count = 0;
+  client_count ++;
+  std::cout << "Client Count: " << client_count << std::endl;
+  char ack_buffer[10];
   for (int i = start; i < start + up_to; i++) {
     const std::string message = "Counter is at: " + std::to_string(i);
-    send(client_socket, message.c_str(), message.size(), 0);
+    int send_status = send(client_socket, message.c_str(), message.size(), 0);
+    if (send_status < 0) {
+      std::cerr << "ERROR: Could not send packet to client " << client_socket << std::endl;
+      close(client_socket);
+    }
+
+    int ack_status = recv(client_socket, ack_buffer, sizeof(ack_buffer), 0);
+    if (ack_status < 0) {
+      std::cerr << "ERROR: ACK Failure from client " << client_socket << std::endl;
+      close(client_socket);
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
   }
   close(client_socket);
 }
@@ -33,6 +48,7 @@ int main()
 	int server_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_socket == -1) {
 		std::cerr << "ERROR: Could not create Socket" << std::endl;
+    return 1;
 	} else {
 		std::cout << "Successfully created Socket" << std::endl;
 	}
@@ -48,6 +64,7 @@ int main()
 
 	if (bind_server < 0) {
 		std::cerr << "ERROR: Could not bind socket" << std::endl;
+    return 1;
 	} else {
 		std::cout << "Successfully bound Socket" << std::endl;
 	}
@@ -55,6 +72,7 @@ int main()
 	int listen_status = listen(server_socket, 5);
 	if (listen_status < 0) {
 		std::cerr << "Listener has failed" << std::endl;
+    return 1;
 	} else {
 		std::cout << "Listener has succeeded" << std::endl;
 	}
@@ -67,7 +85,6 @@ int main()
 	sockaddr_in client_address;
 	socklen_t client_size = sizeof(client_address);
   // stops execution
-  int client_count = 0;
   while (true) {
 
     int client_socket = accept(
@@ -78,9 +95,7 @@ int main()
       continue;
     } 
 
-    client_count++;
 
-    std::cout << "Client Count: " << client_count << std::endl;
 
     std::thread t1( count_to_client, 0, 100,client_socket);
     t1.detach();
