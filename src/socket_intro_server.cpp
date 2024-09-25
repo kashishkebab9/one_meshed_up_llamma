@@ -44,7 +44,14 @@ void count_to_client(int start, int up_to, int client_socket) {
 
 int main()
 {
-	// create socket
+	// create socket (domain, type, protocol)
+  // AF_INET for IPV4, PF_INET used to be used 
+  // AF (Address Family)
+  // PF (Protocol Family)
+  
+  //TODO: Server only runs in TCP, need to make it adaptable to UDP
+  // SOCK_STREAM is for TCP
+  // SOCK_DGRAM for UDP
 	int server_socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_socket == -1) {
 		std::cerr << "ERROR: Could not create Socket" << std::endl;
