@@ -23,7 +23,7 @@ def onReceive(packet, interface): # pylint: disable=unused-argument
         if "Packet" in packet["decoded"]["payload"].decode("utf-8"):
             print(f"Received: {packet["decoded"]["payload"]}")
             print(f"Timestamp Received: {packet["rxTime"]}")
-            local.sendText("ACK")
+            local.sendText("ACK", destinationId="!b47f5555")
             print("Sent Text!")
             time_stamps.append(packet["rxTime"])
             
