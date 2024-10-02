@@ -13,9 +13,6 @@ def cont_gate(packet):
 
 interface = meshtastic.serial_interface.SerialInterface()
 
-# for node in interface.nodes.values():
-#     print(f"Node ID: {node['num']}, User ID: {node['user']['id']}")
-
 
 
 pub.subscribe(cont_gate, "meshtastic.receive")
