@@ -17,14 +17,14 @@ interface = meshtastic.serial_interface.SerialInterface()
 
 pub.subscribe(cont_gate, "meshtastic.receive")
 
-for i in range(100):
+for i in range(3):
     print("Sending Text...")
 
     # large payload
     #interface.sendText(f"Packet {i}: {lorem.paragraph()[:223 ]}", destinationId="!01475a49")
 
     # small payload
-    interface.sendText(f"Packet {i}", destinationId="!01475a49")
+    interface.sendText(f"Packet {i}", destinationId="!b47f555")
     while not can_continue:
         pass
     can_continue = False
