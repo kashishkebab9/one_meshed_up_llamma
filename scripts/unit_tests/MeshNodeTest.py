@@ -12,3 +12,11 @@ class MeshNodeTest(unittest.TestCase):
     def testCreatePacket(self):
         # TODO: Test for Type Correction
         # TODO: Test for Size (input and output)
+        pass
+
+    def testSeparateString(self):
+        pass
+
+
+
+

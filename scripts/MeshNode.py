@@ -6,7 +6,6 @@ import sys
 from termcolor import colored, cprint
 
 
-import lorem
 
 
 from PacketHeader import PacketHeader
@@ -41,16 +40,18 @@ class MeshNode:
     def CreateMsg(self, string_input: str):
         string_input = string_input.encode("utf-8")
         sizeof_str = len(string_input)
-        print(string_input)
+        print(f"String Input: {string_input}")
         print(f"Size of Input String: {sizeof_str} bytes")
 
         # Container for either single or list of Strings, depending on following conditional
-        output_string = []
+        string_container = []
         if sizeof_str > self.max_string_size:
             print(colored("String input is greater than max string size! Performing fragmentation...", 'yellow'))
-            output_string = self.SeparateString(string_input)
+            string_container = self.SeparateString(string_input)
         else:
-            output_string.append(string_input)
+            string_container.append(string_input)
+
+
         
     def SeparateString(self, string_input: str) -> [str]:
         """ Takes a string larger than the self.max_string_size and fragments 
@@ -66,8 +67,28 @@ class MeshNode:
         [str]
             List of strings, each ready for packetization
         """
+        if len(string_input) < self.max_string_size:
+            return [string_input]
+
+        last_packet_size = len(string_input) % self.max_string_size
+        num_full_packets = (len(string_input) - last_packet_size) / self.max_string_size
+
+        if not num_full_packets.is_integer():
+            print(colored("ERROR: Value is not whole, packet calculation has occured", 'red'))
+            print(colored(f"Value: {num_full_packets}", 'red'))
+
+        output_string_list = []
+        for i in range(int(num_full_packets)):
+            string_val = string_input[:self.max_string_size]
+            string_input = string_input[self.max_string_size:]
+            output_string_list.append(string_val)
+
+        output_string_list.append(string_input)
 
 
+        # for i in output_string_list:
+        #     print(len(i))
+        # print(output_string_list)
 
     def CreatePacket(self, string_input:str) -> str:
         """ Converts a string into the desired packet for Meshtastic experiments
@@ -100,6 +121,10 @@ class MeshNode:
 
 if __name__ == '__main__':
     mn = MeshNode("a")
-    string_input = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+    # 500 char input
+    # Lorem was adding confusion, just want to make the char->byte mapping 
+    # explicit with this string
+    string_input = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     mn.CreateMsg(string_input)
     
