@@ -84,11 +84,7 @@ class MeshNode:
             output_string_list.append(string_val)
 
         output_string_list.append(string_input)
-
-
-        # for i in output_string_list:
-        #     print(len(i))
-        # print(output_string_list)
+        return output_string_list
 
     def CreatePacket(self, string_input:str) -> str:
         """ Converts a string into the desired packet for Meshtastic experiments
@@ -125,6 +121,4 @@ if __name__ == '__main__':
     # 500 char input
     # Lorem was adding confusion, just want to make the char->byte mapping 
     # explicit with this string
-    string_input = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    mn.CreateMsg(string_input)
     
