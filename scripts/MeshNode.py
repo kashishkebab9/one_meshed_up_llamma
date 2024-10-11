@@ -4,11 +4,9 @@ import time
 from pubsub import pub
 import sys
 from termcolor import colored, cprint
+from PacketFooter import PacketFooter, PacketType
 
 
-
-
-from PacketHeader import PacketHeader
 
 class MeshNode:
 
@@ -16,19 +14,19 @@ class MeshNode:
         self.meshtastic_id = id 
 
         print(f"Initializing MeshNode with ID: {id}")
-        self.packet_header = PacketHeader()
+        self.packet_footer = PacketFooter()
 
-        # Byte Sizes for each component of the Packet Header
+        # Byte Sizes for each component of the Packet Footer
         # TODO: Make this an interation on the dictionary for robust error checking
         print("============================================================")
-        print(f"Number of Bytes for the Packet Header: {self.packet_header.packet_sizes['packet_header_size']}")
-        print(f"    Number of Bytes for the Hash: {self.packet_header.packet_sizes['hash_size']}")
-        print(f"    Number of Bytes for the Time Stamp: {self.packet_header.packet_sizes['timestamp_size']}")
-        print(f"    Number of Bytes for the Number of Total Packets: {self.packet_header.packet_sizes['num_total_packet_size']}")
-        print(f"    Number of Bytes for the Packet Sequence Number: {self.packet_header.packet_sizes['packet_sequence_size']}")
-        print(f"    Number of Bytes for the Packet Type: {self.packet_header.packet_sizes['packet_type_size']}")
+        print(f"Number of Bytes for the Packet Footer: {self.packet_footer.packet_sizes['packet_footer_size']}")
+        print(f"    Number of Bytes for the Hash: {self.packet_footer.packet_sizes['hash_size']}")
+        print(f"    Number of Bytes for the Time Stamp: {self.packet_footer.packet_sizes['timestamp_size']}")
+        print(f"    Number of Bytes for the Number of Total Packets: {self.packet_footer.packet_sizes['num_total_packet_size']}")
+        print(f"    Number of Bytes for the Packet Sequence Number: {self.packet_footer.packet_sizes['packet_sequence_size']}")
+        print(f"    Number of Bytes for the Packet Type: {self.packet_footer.packet_sizes['packet_type_size']}")
 
-        self.max_string_size= 237 - self.packet_header.packet_sizes["packet_header_size"] 
+        self.max_string_size= 237 - self.packet_footer.packet_sizes["packet_footer_size"] 
         print("============================================================")
         print(f"Maximum str size for msgs: {self.max_string_size}")
 
@@ -38,6 +36,19 @@ class MeshNode:
         print(".")
 
     def CreateMsg(self, string_input: str):
+        """ Takes a string and outputs full meshtastic packet with footer, only missing field will be timestamp_size
+        since that needs to be appended at time of Send()
+
+        Parameters
+        ----------
+        string_input
+            Desired String to send in Meshtastic Network
+
+        Returns
+        -------
+        [str]
+            List of strings, each packetized
+        """
         string_input = string_input.encode("utf-8")
         sizeof_str = len(string_input)
         print(f"String Input: {string_input}")
@@ -50,6 +61,9 @@ class MeshNode:
             string_container = self.SeparateString(string_input)
         else:
             string_container.append(string_input)
+
+        for string_msg in string_container:
+            self.CreatePacket(string_msg)
 
 
         
@@ -86,9 +100,9 @@ class MeshNode:
         output_string_list.append(string_input)
         return output_string_list
 
-    def CreatePacket(self, string_input:str) -> str:
+    def CreatePacket(self, string_input:str, num_packets:int, packet_sequence:int, packet_type:PacketType ) -> str:
         """ Converts a string into the desired packet for Meshtastic experiments
-            The max size a string can be 237 bytes - our custom packet header 
+            The max size a string can be 237 bytes - our custom packet footer 
             size
             Hash Length - 32 bits : 4 bytes
             Epoch Timestamp of Transmission - 32 bits: 4 bytes
@@ -111,7 +125,7 @@ class MeshNode:
         """
         if not isinstance(string_input, str):
             raise TypeError(f"Not a Valid input!\nInput: {string_input}")
-
+        packet = PacketFooter()
 
 
 

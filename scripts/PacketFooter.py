@@ -5,7 +5,7 @@ class PacketType(Enum):
     REP = 2 # Rep from LLM to go from Base to Robot
     FDBK = 3  # Continous messages to indicate current status of Robot
 
-class PacketHeader:
+class PacketFooter:
     def __init__(self):
         # All header components are strings
         self.hash = None
@@ -23,7 +23,7 @@ class PacketHeader:
 
 
         # Total Packet Size
-        self.packet_header_size = ( self.hash_size + 
+        self.packet_footer_size = ( self.hash_size + 
                                     self.timestamp_size + 
                                     self.num_total_packet_size +
                                     self.packet_sequence_size +
@@ -35,29 +35,29 @@ class PacketHeader:
             "num_total_packet_size": self.num_total_packet_size,
             "packet_sequence_size": self.packet_sequence_size,
             "packet_type_size": self.packet_type_size,
-            "packet_header_size": self.packet_header_size
+            "packet_footer_size": self.packet_footer_size
         }
     
     def SetHash(self, hash):
-        # TODO Perform Stringification 
-        self.hash = hash
+        # Gets set within CreatePacket
+        self.hash = hash 
 
     def SetTimestamp(self, time_stamp):
-        # TODO Perform Stringification 
+        # Gets set at time of sending the msg
         self.time_stamp = time_stamp
 
     def SetNumTotalPackets(self, num_total_packets):
-        # TODO Perform Stringification 
+        # Gets set within CreatePacket
         self.num_total_packets = num_total_packets
 
     def SetPacketSequence(self, packet_sequence):
-        # TODO Perform Stringification 
+        # Gets set within CreatePacket
         self.packet_sequence = packet_sequence
 
     def SetPacketType(self, packet_type):
-        # TODO Perform Stringification 
+        # Gets set within CreatePacket
         self.packet_type = packet_type
 
 if __name__ == '__main__':
-    packet_header = PacketHeader()
-    print(packet_header.packet_sizes["packet_header_size"])
+    packet_footer = PacketFooter()
+    print(packet_footer.packet_sizes["packet_footer_size"])
