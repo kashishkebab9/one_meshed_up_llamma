@@ -14,11 +14,16 @@ class PacketFooter:
         self.packet_sequence = None
         self.packet_type = None
 
-        # Byte Sizes, to ensure we don't go above the limit
-        self.hash_size = 4
+        # Char Sizes, to ensure we don't go above the limit
+        self.hash_size = 5
         self.timestamp_size = 4
-        self.num_total_packet_size = 1
-        self.packet_sequence_size = 1
+
+        # Max number of Packets has to be < 1000
+        # Change both of the following if you intend on changing either
+        self.num_total_packet_size = 3
+        self.MAX_NUM_PACKETS = 999
+
+        self.packet_sequence_size = 2
         self.packet_type_size = 1
 
 

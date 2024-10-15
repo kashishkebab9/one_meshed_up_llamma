@@ -4,9 +4,8 @@ import time
 from pubsub import pub
 import sys
 from termcolor import colored, cprint
+import hashlib
 from PacketFooter import PacketFooter, PacketType
-
-
 
 class MeshNode:
 
@@ -25,10 +24,18 @@ class MeshNode:
         print(f"    Number of Bytes for the Number of Total Packets: {self.packet_footer.packet_sizes['num_total_packet_size']}")
         print(f"    Number of Bytes for the Packet Sequence Number: {self.packet_footer.packet_sizes['packet_sequence_size']}")
         print(f"    Number of Bytes for the Packet Type: {self.packet_footer.packet_sizes['packet_type_size']}")
+        print("============================================================")
 
         self.max_string_size= 237 - self.packet_footer.packet_sizes["packet_footer_size"] 
-        print("============================================================")
         print(f"Maximum str size for msgs: {self.max_string_size}")
+
+        # Length of the hash in bits
+        # We can expect a collision after approx
+        # math.sqrt(2**HASH_LENGTH_BITS)
+        # https://preshing.com/20110504/hash-collision-probabilities/
+
+        self.HASH_LENGTH = 5
+        self.HASH_LENGTH_BITS = self.HASH_LENGTH * 8
 
         print("Done Initializing!")
         print(".")
@@ -62,6 +69,7 @@ class MeshNode:
         else:
             string_container.append(string_input)
 
+        # TODO: Determine all other PacketFooter Parameters
         for string_msg in string_container:
             self.CreatePacket(string_msg)
 
@@ -81,6 +89,7 @@ class MeshNode:
         [str]
             List of strings, each ready for packetization
         """
+        # TODO: Check if string is ENCODED
         if len(string_input) < self.max_string_size:
             return [string_input]
 
@@ -123,14 +132,36 @@ class MeshNode:
             New, packetized string ready for comms
 
         """
-        if not isinstance(string_input, str):
-            raise TypeError(f"Not a Valid input!\nInput: {string_input}")
-        packet = PacketFooter()
+        # TODO: Check if string is ENCODED
+        # if not isinstance(string_input, str):
+        #     raise TypeError(f"Not a Valid input!\nInput: {string_input}")
+        packet_footer = PacketFooter()
+
+        # Set Hash
+        hash = hashlib.sha256(string_input)
+        hash_s = str(hash.hexdigest()[:self.HASH_LENGTH])
+        packet_footer.SetHash(hash_d)
+
+        # Set the Num Packets
+        if num_packets > packet_footer.MAX_NUM_PACKETS:
+            raise ValueError("Too Many packets for this transmission!")
+        num_packets_s = str(num_packets)
+        packet_footer.SetNumTotalPackets(num_packets_s)
+
+        # Set the Packet Sequence
+        if packet_sequence > num_packets - 1:
+            raise ValueError("Packet Sequence Index greater than this transmission num packets")
+        packet_sequence_s = str(packet_sequence)
+        packet_footer.SetPacketSequence(packet_sequence_s)
+
 
 
 
 if __name__ == '__main__':
     mn = MeshNode("a")
+    string ="AA"
+    string = string.encode("utf-8")
+    mn.CreatePacket(string, 1, 0, PacketType.REQ)
 
     # 500 char input
     # Lorem was adding confusion, just want to make the char->byte mapping 
